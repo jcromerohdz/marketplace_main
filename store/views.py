@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
 from django.shortcuts import get_object_or_404, render, redirect
 from .models import Category, Item
 
@@ -44,6 +45,11 @@ def register(request):
         'form': form
     }
     return render(request, 'store/signup.html', context)
+
+def logout_user(request):
+    logout(request)
+
+    return redirect('home')
 
 @login_required
 def add_item(request):
