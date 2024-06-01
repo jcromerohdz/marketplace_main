@@ -1,5 +1,8 @@
-from django.shortcuts import get_object_or_404, render
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, render, redirect
 from .models import Category, Item
+
+from .forms import SignupForm, NewItemForm
 
 # Create your views here.
 def home(request):
@@ -18,10 +21,36 @@ def contact(request):
 
 def detail(request, pk):
     item = get_object_or_404(Item, pk=pk)
+    related_items = Item.objects.filter(category=item.category, is_sold=False).exclude(pk=pk)[0:3]
 
     context = {
-        'item': item
+        'item': item,
+        'related_items': related_items
     }
 
     return render(request, 'store/item.html', context)
     
+def register(request):
+    if request.method == 'POST':
+        form = SignupForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+    else:
+        form = SignupForm()
+
+    context = {
+        'form': form
+    }
+    return render(request, 'store/signup.html', context)
+
+@login_required
+def add_item(request):
+    form = NewItemForm()
+
+    context = {
+        'form': form
+    }
+
+    return render(request, 'store/form.html', context)
